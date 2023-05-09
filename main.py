@@ -1,9 +1,9 @@
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Integer, Column, String
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from models import get_user_by_email, create_user, get_user, User
+from models import get_user_by_email, create_user, get_user
 
 # Cria uma conexão com o banco de dados SQLite
 SQLALCHEMY_DATABASE_URL = "sqlite:///./dados.db"
@@ -12,6 +12,19 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 # Cria uma sessão do banco de dados
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    password = Column(String)
+
+    def __repr__(self):
+        return f"<User(name='{self.name}', email='{self.email}')>"
+
 
 # Cria uma instância da aplicação FastAPI
 app = FastAPI()
@@ -27,6 +40,21 @@ def get_db():
 
 
 # Rotas
+# Default Route
+@app.get("/")
+def read_root():
+    return {"Welcome to the Database Editor.\n Click here http://0.0.0.0:8000/docs to access."}
+
+
+# Create
+@app.post("/users/")
+def create_new_user(name: str, email: str, password: str, db: Session = Depends(get_db)):
+    db_user = get_user_by_email(db, email=email)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return create_user(db=db, name=name, email=email, password=password)
+
+
 # Create
 @app.post("/users/")
 def create_new_user(name: str, email: str, password: str, db: Session = Depends(get_db)):
