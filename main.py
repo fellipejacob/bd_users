@@ -1,7 +1,7 @@
 import uvicorn
 from routes.users import users
 from configs.core import app
-from database.models.user import Base, engine
+from database.models.repository import Base, engine
 
 routes = [users]
 for route in routes:

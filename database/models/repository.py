@@ -1,5 +1,14 @@
-from sqlalchemy.orm import Session
-from database.models.user import User, SessionLocal
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+# Cria uma conexão com o banco de dados SQLite
+SQLALCHEMY_DATABASE_URL = "sqlite:///./dados.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
+# Cria uma sessão do banco de dados
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
 
 
 def get_db():
@@ -8,42 +17,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-# Função de banco de dados para buscar o usuário por ID
-def get_user(db: Session, user_id: int):
-    return db.query(User).filter(User.id == user_id).first()
-
-
-# Função de banco de dados para buscar o usuário por CPF
-def get_user_by_cpf(db: Session, cpf: str):
-    return db.query(User).filter(User.cpf == cpf).first()
-
-
-# Função de banco de dados para criar o usuário
-def create_user(db: Session, name: str, cpf: str, password: str):
-    db_user = User(name=name, cpf=cpf, password=password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-
-
-# Função de banco de dados para atualizar o usuário
-def update_user_by_cpf(db: Session, cpf: str, name: str = None,
-                       password: str = None):
-    db_user = db.query(User).filter(User.cpf == cpf).first()
-    if db_user:
-        if name is not None:
-            db_user.name = name
-        if password is not None:
-            db_user.password = password
-        db.commit()
-        db.refresh(db_user)
-    return db_user
-
-
-# Função de banco de dados para remover o usuário
-def remove_user(db: Session, user: User):
-    db.delete(user)
-    db.commit()

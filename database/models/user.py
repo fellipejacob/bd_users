@@ -1,14 +1,5 @@
-from sqlalchemy import Integer, Column, String, create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-
-# Cria uma conexão com o banco de dados SQLite
-SQLALCHEMY_DATABASE_URL = "sqlite:///./dados.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-
-# Cria uma sessão do banco de dados
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
+from sqlalchemy import Integer, Column, String
+from database.models.repository import Base
 
 
 class User(Base):
