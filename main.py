@@ -1,5 +1,6 @@
 import uvicorn
-from routes.routes import users, app
+from routes.users import users
+from configs.core import app
 from database.models.user import Base, engine
 
 routes = [users]
