@@ -30,13 +30,16 @@ def create_user(db: Session, name: str, cpf: str, password: str):
 
 
 # Função de banco de dados para atualizar o usuário
-def update_user_db(db: Session, user: User, name: str, cpf: str, password: str):
-    user.name = name
-    user.cpf = cpf
-    user.password = password
-    db.commit()
-    db.refresh(user)
-    return user
+def update_user_by_cpf(db: Session, cpf: str, name: str = None, password: str = None):
+    db_user = db.query(User).filter(User.cpf == cpf).first()
+    if db_user:
+        if name is not None:
+            db_user.name = name
+        if password is not None:
+            db_user.password = password
+        db.commit()
+        db.refresh(db_user)
+    return db_user
 
 
 # Função de banco de dados para remover o usuário
