@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import create_engine, Integer, Column, String
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from models import get_user_by_email, create_user, get_user
+from models import create_user, get_user_by_cpf
 
 # Cria uma conexão com o banco de dados SQLite
 SQLALCHEMY_DATABASE_URL = "sqlite:///./dados.db"
@@ -19,11 +19,11 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
+    cpf = Column(String, unique=True, index=True)
     password = Column(String)
 
     def __repr__(self):
-        return f"<User(name='{self.name}', email='{self.email}')>"
+        return f"<User(name='{self.name}', cpf='{self.cpf}')>"
 
 
 # Cria uma instância da aplicação FastAPI
@@ -41,33 +41,25 @@ def get_db():
 
 # Rotas
 # Default Route
-@app.get("/")
-def read_root():
-    return {"Welcome to the Database Editor.\n Click here http://0.0.0.0:8000/docs to access."}
+@app.get("/users")
+def read_root(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return users
 
 
 # Create
 @app.post("/users/")
-def create_new_user(name: str, email: str, password: str, db: Session = Depends(get_db)):
-    db_user = get_user_by_email(db, email=email)
+def create_new_user(name: str, cpf: str, password: str, db: Session = Depends(get_db)):
+    db_user = get_user_by_cpf(db, cpf=cpf)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    return create_user(db=db, name=name, email=email, password=password)
-
-
-# Create
-@app.post("/users/")
-def create_new_user(name: str, email: str, password: str, db: Session = Depends(get_db)):
-    db_user = get_user_by_email(db, email=email)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return create_user(db=db, name=name, email=email, password=password)
+    return create_user(db=db, name=name, cpf=cpf, password=password)
 
 
 # Read
 @app.get("/users/{user_id}")
-def read_user(user_id: int, db: Session = Depends(get_db)):
-    user = get_user(db, user_id=user_id)
+def read_user(cpf: str, db: Session = Depends(get_db)):
+    user = get_user_by_cpf(db, cpf=cpf)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -75,17 +67,17 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 # Update
 @app.put("/users/{user_id}")
-def update_user(user_id: int, name: str, email: str, password: str, db: Session = Depends(get_db)):
-    db_user = get_user(db, user_id=user_id)
+def update_user(name: str, cpf: str, password: str, db: Session = Depends(get_db)):
+    db_user = get_user_by_cpf(db, cpf=cpf)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    updated_user = update_user_db(db=db, user=db_user, name=name, email=email, password=password)
+    updated_user = update_user_db(db=db, user=db_user, name=name, cpf=cpf, password=password)
     return jsonable_encoder(updated_user)
 
 
-def update_user_db(db: Session, user: User, name: str, email: str, password: str):
+def update_user_db(db: Session, user: User, name: str, cpf: str, password: str):
     user.name = name
-    user.email = email
+    user.cpf = cpf
     user.password = password
     db.commit()
     db.refresh(user)
@@ -94,8 +86,8 @@ def update_user_db(db: Session, user: User, name: str, email: str, password: str
 
 # Delete
 @app.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = get_user(db, user_id=user_id)
+def delete_user(cpf: str, db: Session = Depends(get_db)):
+    db_user = get_user_by_cpf(db, cpf=cpf)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     remove_user(db=db, user=db_user)
