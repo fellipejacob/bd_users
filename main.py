@@ -1,9 +1,11 @@
 import uvicorn
 from routes.users import users
+from routes.login import login
 from configs.core import app
 from database.models.repository import Base, engine
 
-routes = [users]
+
+routes = [users, login]
 for route in routes:
     route.apply()
 

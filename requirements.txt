@@ -1,3 +1,5 @@
-sqlalchemy
-FastAPI
-uvicorn
+sqlalchemy~=2.0.12
+FastAPI~=0.95.1
+uvicorn~=0.22.0
+pydantic~=1.10.7
+passlib~=1.7.4

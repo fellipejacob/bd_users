@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from database.models.user import User
+import hashlib
 
 
 class UserServices:
@@ -19,7 +20,8 @@ class UserServices:
     # Função de banco de dados para criar o usuário
     @staticmethod
     def create_user(db: Session, name: str, cpf: str, password: str):
-        db_user = User(name=name, cpf=cpf, password=password)
+        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        db_user = User(name=name, cpf=cpf, password=password_hash)
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
@@ -34,7 +36,8 @@ class UserServices:
             if name is not None:
                 db_user.name = name
             if password is not None:
-                db_user.password = password
+                hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+                db_user.password = hashed_password
             db.commit()
             db.refresh(db_user)
         return db_user
