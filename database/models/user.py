@@ -8,7 +8,6 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 # Cria uma sessão do banco de dados
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-
 Base = declarative_base()
 
 

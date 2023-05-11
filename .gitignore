@@ -9,6 +9,7 @@ __pycache__/
 #Database
 dados.db
 
+.idea
 
 # Distribution / packaging
 .Python

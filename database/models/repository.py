@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from bd_users.database.models.user import User, SessionLocal
+from database.models.user import User, SessionLocal
 
 
 def get_db():
@@ -30,7 +30,8 @@ def create_user(db: Session, name: str, cpf: str, password: str):
 
 
 # Função de banco de dados para atualizar o usuário
-def update_user_by_cpf(db: Session, cpf: str, name: str = None, password: str = None):
+def update_user_by_cpf(db: Session, cpf: str, name: str = None,
+                       password: str = None):
     db_user = db.query(User).filter(User.cpf == cpf).first()
     if db_user:
         if name is not None:
