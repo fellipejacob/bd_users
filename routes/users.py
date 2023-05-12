@@ -7,7 +7,6 @@ from configs.core import app
 
 
 # Cria uma instância da aplicação FastAPI
-
 class Users:
     def __int__(self):
         pass

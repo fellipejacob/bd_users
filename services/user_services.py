@@ -3,6 +3,11 @@ from database.models.user import User
 import hashlib
 
 
+SECRET_KEY = "mysecretkey"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
 class UserServices:
     def __init__(self):
         pass
@@ -20,12 +25,12 @@ class UserServices:
     # Função de banco de dados para criar o usuário
     @staticmethod
     def create_user(db: Session, name: str, cpf: str, password: str):
-        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
-        db_user = User(name=name, cpf=cpf, password=password_hash)
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        db_user = User(name=name, cpf=cpf, password=hashed_password)
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
-        return db_user
+        return {"user": db_user.name, "user_cpf": db_user.cpf}
 
     # Função de banco de dados para atualizar o usuário
     @staticmethod
@@ -40,7 +45,7 @@ class UserServices:
                 db_user.password = hashed_password
             db.commit()
             db.refresh(db_user)
-        return db_user
+        return {"user": db_user.name, "user_cpf": db_user.cpf, "password": db_user.password}
 
     # Função de banco de dados para remover o usuário
     @staticmethod
